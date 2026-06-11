@@ -16,27 +16,25 @@ import (
 
 var pandocArgs = []string{"-f", "markdown+smart", "--toc", "-N", "--template", "templates/default.latex", "-o"}
 
-func pandoc(outputFilename string, errOutputCh chan error) {
+// pandoc renders outputFilename via either local pandoc or Docker, returning any error.
+func pandoc(outputFilename string) error {
 	if config.WhichPandoc() == config.UsePandoc {
-		pandocPandoc(outputFilename, errOutputCh)
-	} else {
-		dockerPandoc(outputFilename, errOutputCh)
+		return pandocPandoc(outputFilename)
 	}
+	return dockerPandoc(outputFilename)
 }
 
-func dockerPandoc(outputFilename string, errOutputCh chan error) {
+func dockerPandoc(outputFilename string) (retErr error) {
 	pandocCmd := append(pandocArgs, fmt.Sprintf("/source/output/%s", outputFilename), fmt.Sprintf("/source/output/%s.md", outputFilename))
 	ctx := context.Background()
 	cli, err := client.NewEnvClient()
 	if err != nil {
-		errOutputCh <- errors.Wrap(err, "unable to read Docker environment")
-		return
+		return errors.Wrap(err, "unable to read Docker environment")
 	}
 
 	pwd, err := os.Getwd()
 	if err != nil {
-		errOutputCh <- errors.Wrap(err, "unable to get workding directory")
-		return
+		return errors.Wrap(err, "unable to get working directory")
 	}
 
 	hc := &container.HostConfig{
@@ -49,25 +47,19 @@ func dockerPandoc(outputFilename string, errOutputCh chan error) {
 		hc, nil, nil, "")
 
 	if err != nil {
-		errOutputCh <- errors.Wrap(err, "unable to create Docker container")
-		return
+		return errors.Wrap(err, "unable to create Docker container")
 	}
 
 	defer func() {
 		timeout := 2 * time.Second
 		cli.ContainerStop(ctx, resp.ID, &timeout)
-		err := cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true})
-		if err != nil {
-			errOutputCh <- errors.Wrap(err, "unable to remove container")
-			return
+		if err := cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{Force: true}); err != nil && retErr == nil {
+			retErr = errors.Wrap(err, "unable to remove container")
 		}
-		errOutputCh <- nil
 	}()
 
-	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
-	if err != nil {
-		errOutputCh <- errors.Wrap(err, "unable to start Docker container")
-		return
+	if err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		return errors.Wrap(err, "unable to start Docker container")
 	}
 
 	chanResult, chanErr := cli.ContainerWait(ctx, resp.ID, "not-running")
@@ -75,31 +67,28 @@ func dockerPandoc(outputFilename string, errOutputCh chan error) {
 
 	if resultValue.StatusCode != 0 {
 		err = <-chanErr
-		errOutputCh <- errors.Wrap(err, "error awaiting Docker container")
-		return
+		return errors.Wrap(err, "error awaiting Docker container")
 	}
 
 	_, err = cli.ContainerLogs(ctx, resp.ID, types.ContainerLogsOptions{ShowStdout: true})
 	if err != nil {
-		errOutputCh <- errors.Wrap(err, "error reading Docker container logs")
-		return
+		return errors.Wrap(err, "error reading Docker container logs")
 	}
 
 	if _, err = os.Stat(fmt.Sprintf("output/%s", outputFilename)); err != nil && os.IsNotExist(err) {
-		errOutputCh <- errors.Wrap(err, "output not generated; verify your Docker image is up to date")
-		return
+		return errors.Wrap(err, "output not generated; verify your Docker image is up to date")
 	}
+
+	return nil
 }
 
 // 🐼
-func pandocPandoc(outputFilename string, errOutputCh chan error) error {
+func pandocPandoc(outputFilename string) error {
 	cmd := exec.Command("pandoc", append(pandocArgs, fmt.Sprintf("output/%s", outputFilename), fmt.Sprintf("output/%s.md", outputFilename))...)
 	outputRaw, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println(string(outputRaw))
-		errOutputCh <- errors.Wrap(err, "error calling pandoc")
-	} else {
-		errOutputCh <- nil
+		return errors.Wrap(err, "error calling pandoc")
 	}
 	return nil
 }

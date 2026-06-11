@@ -1,75 +1,61 @@
-![Comply](./logo.png)
+# UnCONSULT
 
-Comply is a SOC2-focused compliance automation tool:
+**A compliance automation toolkit for building a complete ISMS — conforming to both ISO 27001:2022 and SOC2.**
 
-- **Policy Generator**: markdown-powered **document pipeline** for publishing auditor-friendly **policy documents**
-- **Ticketing Integration**: automate compliance throughout the year via your existing **ticketing system**
-- **SOC2 Templates**: open source policy and procedure **templates** suitable for satisfying a SOC2 audit
+UnCONSULT is built on top of [Comply](https://github.com/strongdm/comply) by [StrongDM](https://www.strongdm.com/), an open-source SOC2 compliance automation tool. Full credit to the StrongDM team for the foundation this project extends — see [NOTICE](./NOTICE) and [LICENSE.txt](./LICENSE.txt) (Apache 2.0).
 
-# Installation
+## What it does
 
-macOS:
+- **Policy Generator**: markdown-powered document pipeline that publishes auditor-friendly policy PDFs and a static HTML dashboard
+- **Dual-standard coverage**: ships with both **ISO 27001:2022 Annex A** (all 93 controls) and **SOC2 Trust Services Criteria**, with every control mapped to a satisfying policy or narrative out of the box
+- **ISMS scaffolding**: includes ISMS scope, information security objectives, and Statement of Applicability narratives alongside 39 policy templates
+- **Clause-grouped dashboard**: controls are organized by ISO clause family (A.5 Organizational, A.6 People, A.7 Physical, A.8 Technological) and TSC category, with satisfied/unsatisfied status per control
+- **Ticketing integration**: track procedure completion through GitHub, Jira, or GitLab
 
-`brew tap strongdm/comply; brew install comply`
+## What's different from upstream Comply
 
-Linux:
+- ISO 27001:2022 Annex A standard definition and full `satisfies:` mappings across all templates
+- 12 additional policies and 3 ISMS narratives closing every Annex A gap (93/93 coverage)
+- Dashboard renders one table per control family per standard, instead of a flat list
+- 13 bug fixes (goroutine deadlocks, nil dereferences, swallowed errors, WebSocket origin checking, deprecated `io/ioutil`)
+- `comply init` always provisions the dual-standard theme — no SOC2-vs-blank prompt
 
-[Download latest release](https://github.com/strongdm/comply/releases)
+## Installation
 
-Go users:
+Build from source (requires Go and `make`):
 
-`go get github.com/strongdm/comply`
-
-# Get Started
-
-Start with `comply init`:
-
+```bash
+git clone <this-repo>
+cd complyISO27K
+PATH="$PATH:$(go env GOPATH)/bin" make
+sudo cp comply /opt/homebrew/bin/comply   # or anywhere on your PATH
 ```
-$ mkdir my-company
-$ cd my-company
-$ comply init
+
+The binary is named `comply`, same as upstream.
+
+### Dependencies
+
+Rendering PDFs relies on [pandoc](https://pandoc.org/), installed either as an OS package or invoked via Docker:
+
+```bash
+brew install pandoc basictex   # macOS — recommended over Docker on Apple Silicon
 ```
 
-Once `comply init` is complete, just `git init` and `git push` your project to a new repository. You're ready to begin editing the included policy boilerplate text.
+## Get started
 
-# Discussion
+```bash
+mkdir my-company
+cd my-company
+comply init      # interactive setup
+comply build     # generate output/ with HTML dashboard and PDFs
+comply serve     # live-reload server at :4000
+```
 
-Join us in [Comply Users](https://join.slack.com/t/comply-users/shared_invite/zt-4k3f46wy-Cs1DceznNvAL~lnW9_HjIA)
-
-# Screenshots
-
-[Demo video](https://vimeo.com/270257486)
-
-## Start a Project
-
-![screencast 1](sc-1.gif)
-
-## Build PDFs
-
-![screencast 4](sc-4.gif)
-![pdf example](pdf-example.png)
-
-## Track Policy Coverage
-
-![screencast 3](sc-2.gif)
-
-## Dashboard
-
-![screencast 2](sc-3.gif)
-
-## Dependencies
-
-Comply relies on [pandoc](https://pandoc.org/), which can be installed directly as an OS package or invoked via Docker.
+Once `comply init` is complete, `git init` and push your project to a new repository, then begin editing the included policy text.
 
 ## CLI
 
 ```
-NAME:
-   comply - policy compliance toolkit
-
-USAGE:
-   comply [global options] command [command options] [arguments...]
-
 COMMANDS:
      init             initialize a new compliance repository (interactive)
      build, b         generate a static website summarizing the compliance program
@@ -78,51 +64,11 @@ COMMANDS:
      serve            live updating version of the build command
      sync             sync ticket status to local cache
      todo             list declared vs satisfied compliance controls
-     help, h          Shows a list of commands or help for one command
 ```
 
-## Running in Docker
+## Ticketing integrations
 
-Comply is currently only released for Linux and macOS, however from other operating systems it's possible to run using Docker:
-
-```
-# first pull the latest published docker image
-$ docker pull strongdm/comply
-
-# from an empty directory that will contain your comply project
-$ docker run --rm -v "$PWD":/source -p 4000:4000 -it strongdm/comply
-root@ec4544732298:/source# comply init
-✗ Organization Name:
-
-# serve content live from an established project
-$ docker run --rm -v "$PWD":/source -p 4000:4000 -it strongdm/comply
-root@ae4d499583fc:/source# comply serve
-Serving content of output/ at http://127.0.0.1:4000 (ctrl-c to quit)
-```
-
-For Windows users, replace $PWD with the full path to your project directory
-
-### Running in macOS M1
-
-If you're running Comply inside Docker, or using it installed by HomeBrew, in a macOS M1, you should increase the Docker allocatable memory space to ~7 GB, but it won't run smoothly. So, we recommend to run Comply locally with pandoc binary installed via HomeBrew. For that, install the `pandoc` and `basictex` packages using the following command:
-
-```bash
-brew install pandoc basictex
-```
-
-Then when running the Comply binary -installed by HomeBrew- it will work as expected.
-
-## Ticketing Integrations:
-
-- Jira
-- Github
-- Gitlab
-
-## Configuration
-
-## GitHub
-
-Ticketing integration with GitHub can be configured with the following YAML in `comply.yml`:
+GitHub, Jira, and GitLab are supported. Configure in `comply.yml`:
 
 ```yaml
 tickets:
@@ -132,41 +78,19 @@ tickets:
     username: org or personal username
 ```
 
-If you're setting up the repo in your personal account, set `username` to your username.
-If you're setting up the repo in an github organization, set `username` to your org's username instead.
+Environment variables (`GITHUB_REPO`, `GITHUB_TOKEN`, `GITHUB_USERNAME`, `JIRA_USERNAME`, etc.) override values from the YAML file.
 
-Also, `GITHUB_REPO`, `GITHUB_TOKEN`, and `GITHUB_USERNAME` can be used to override values from the YAML file.
+For Jira, ensure the default _Create Screen_ includes assignee, description, issuetype, labels, project key, reporter, and summary, with no other required fields. Authenticate with an [API token](https://id.atlassian.com/manage-profile/security/api-tokens).
 
-### Jira
+## Development
 
-When comply creates a ticket (through `proc`, for instance), it sets the following fields.
-
-- assignee
-- description
-- issuetype
-- labels
-- project key
-- reporter
-- summary
-
-Please make sure that the default _Create Screen_ has all of those fields enabled. Additionally, make sure that there are no other required fields for the issue type you choose.
-
-About authentication, you need to create an [API Token](https://id.atlassian.com/manage-profile/security/api-tokens) to use as a password.
-
-## Forking and local development
-
-> Assumes installation of golang and configuration of GOPATH in .bash_profile, .zshrc, etc
-> Inspiration: http://code.openark.org/blog/development/forking-golang-repositories-on-github-and-managing-the-import-path
-
+```bash
+PATH="$PATH:$(go env GOPATH)/bin" make    # regenerates embedded theme assets, then builds
+go test ./...                              # run tests
 ```
-$ go get github.com/strongdm/comply
-$ cd $GOPATH/src/github.com/strongdm/comply ; go get ./...
-$ make
-$ cd example
-$ mv comply.yml.example comply.yml
-$ ../comply -h
-$ ../comply sync
-$ ../comply serve
-#
-$ make # recompile as needed with in $GOPATH/src/github.com/strongdm/comply
-```
+
+After editing anything under `themes/`, `make assets` (or plain `make`) must be re-run to regenerate the embedded assets before the change takes effect.
+
+## Credits and license
+
+UnCONSULT is a derivative of [strongdm/comply](https://github.com/strongdm/comply), © strongDM, Inc., used under the [Apache License 2.0](./LICENSE.txt). Modifications are documented in [NOTICE](./NOTICE). StrongDM does not endorse this derivative work.

@@ -3,7 +3,6 @@ package render
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,6 +21,7 @@ import (
 func renderToFilesystem(wg *sync.WaitGroup, errOutputCh chan error, data *renderData, doc *model.Document, live bool) {
 	// only files that have been touched
 	if !isNewer(doc.FullPath, doc.ModifiedAt) {
+		errOutputCh <- nil
 		return
 	}
 	recordModified(doc.FullPath, doc.ModifiedAt)
@@ -31,19 +31,21 @@ func renderToFilesystem(wg *sync.WaitGroup, errOutputCh chan error, data *render
 		defer wg.Done()
 
 		outputFilename := p.OutputFilename
-		// save preprocessed markdown
 		err := preprocessDoc(data, p, filepath.Join(".", "output", outputFilename+".md"))
 		if err != nil {
 			errOutputCh <- errors.Wrap(err, "unable to preprocess")
 			return
 		}
 
-		pandoc(outputFilename, errOutputCh)
+		pandocErr := pandoc(outputFilename)
 
-		// remove preprocessed markdown
-		err = os.Remove(filepath.Join(".", "output", outputFilename+".md"))
-		if err != nil {
-			errOutputCh <- err
+		removeErr := os.Remove(filepath.Join(".", "output", outputFilename+".md"))
+		if pandocErr != nil {
+			errOutputCh <- pandocErr
+			return
+		}
+		if removeErr != nil {
+			errOutputCh <- removeErr
 			return
 		}
 
@@ -52,6 +54,7 @@ func renderToFilesystem(wg *sync.WaitGroup, errOutputCh chan error, data *render
 			rel = p.FullPath
 		}
 		fmt.Printf("%s -> %s\n", rel, filepath.Join("output", p.OutputFilename))
+		errOutputCh <- nil
 	}(doc)
 }
 
@@ -68,8 +71,7 @@ func getGitApprovalInfo(pol *model.Document) (string, error) {
 	gitBranchCmd := exec.Command("git", gitBranchArgs...)
 	gitBranchInfo, err := gitBranchCmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(gitBranchInfo))
-		return "", errors.Wrap(err, "error looking up git branch")
+		return "", fmt.Errorf("error looking up git branch (output: %s): %w", strings.TrimSpace(string(gitBranchInfo)), err)
 	}
 
 	// if on a different branch than the approved branch, then nothing gets added to the document
@@ -82,8 +84,7 @@ func getGitApprovalInfo(pol *model.Document) (string, error) {
 	cmd := exec.Command("git", gitArgs...)
 	gitApprovalInfo, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(gitApprovalInfo))
-		return "", errors.Wrap(err, "error looking up git committer and author data")
+		return "", fmt.Errorf("error looking up git committer and author data (output: %s): %w", strings.TrimSpace(string(gitApprovalInfo)), err)
 	}
 
 	return fmt.Sprintf("%s\n%s", "# Authorship and Approval", gitApprovalInfo), nil
@@ -96,8 +97,8 @@ func preprocessDoc(data *renderData, pol *model.Document, fullPath string) error
 	bodyTemplate, err := template.New("body").Parse(pol.Body)
 	if err != nil {
 		w.WriteString(fmt.Sprintf("# Error processing template:\n\n%s\n", err.Error()))
-	} else {
-		bodyTemplate.Execute(&w, data)
+	} else if err := bodyTemplate.Execute(&w, data); err != nil {
+		w.WriteString(fmt.Sprintf("# Error executing template:\n\n%s\n", err.Error()))
 	}
 	body := w.String()
 
@@ -162,7 +163,7 @@ header-includes: |
 		body,
 		gitApprovalInfo,
 	)
-	err = ioutil.WriteFile(fullPath, []byte(doc), os.FileMode(0644))
+	err = os.WriteFile(fullPath, []byte(doc), os.FileMode(0644))
 	if err != nil {
 		return errors.Wrap(err, "unable to write preprocessed policy to disk")
 	}

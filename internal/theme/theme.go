@@ -3,7 +3,6 @@ package theme
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,9 +36,9 @@ func SaveTo(themeName string, replace map[string]string, saveDir string) error {
 					rootMdFileTemplate.Execute(&w, replace)
 				}
 				body := w.String()
-				err = ioutil.WriteFile(filepath.Join(saveDir, assetDir, assetFilename), []byte(body), os.FileMode(0644))
+				err = os.WriteFile(filepath.Join(saveDir, assetDir, assetFilename), []byte(body), os.FileMode(0644))
 			} else {
-				err = ioutil.WriteFile(filepath.Join(saveDir, assetDir, assetFilename), MustAsset(name), os.FileMode(0644))
+				err = os.WriteFile(filepath.Join(saveDir, assetDir, assetFilename), MustAsset(name), os.FileMode(0644))
 			}
 
 			if err != nil {

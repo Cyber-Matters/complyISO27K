@@ -3,7 +3,6 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +14,17 @@ import (
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
+
+const banner = `
+  _   _       ____ ___  _   _ ____  _   _ _   _____
+ | | | |_ __ / ___/ _ \| \ | / ___|| | | | | |_   _|
+ | | | | '_ \ |  | | | |  \| \___ \| | | | |   | |
+ | |_| | | | | |__| |_| | |\  |___) | |_| | |___| |
+  \___/|_| |_|\____\___/|_| \_|____/ \___/|_____|_|
+
+  Compliance Management Platform
+  Built on top of Comply by StrongDM
+`
 
 const whatNow = `Next steps:
 
@@ -31,10 +41,12 @@ var initCommand = cli.Command{
 }
 
 func initAction(c *cli.Context) error {
-	fi, _ := ioutil.ReadDir(config.ProjectRoot())
+	fi, _ := os.ReadDir(config.ProjectRoot())
 	if len(fi) > 0 {
 		return errors.New("init must be run from an empty directory")
 	}
+
+	fmt.Print(banner)
 
 	atLeast := func(n int) func(string) error {
 		return func(input string) error {
@@ -75,35 +87,14 @@ func initAction(c *cli.Context) error {
 		return err
 	}
 
-	chooser := promptui.Select{
-		Label: "Compliance Templates",
-		Items: []string{"SOC2", "Blank"},
-	}
-
-	choice, _, err := chooser.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		return err
-	}
-
-	themeName := "comply-blank"
-	switch choice {
-	case 0:
-		themeName = "comply-soc2"
-	case 1:
-		themeName = "comply-blank"
-	default:
-		panic("unrecognized selection")
-	}
-
 	fmt.Printf("\nComply relies on your ticketing system for optional procedure tracking. You can always come back and enable this integration later.\n\n\n")
 
-	chooser = promptui.Select{
+	chooser := promptui.Select{
 		Label: "Ticket System",
 		Items: []string{"GitHub", "Jira", "GitLab", "None"},
 	}
 
-	choice, _, err = chooser.Run()
+	choice, _, err := chooser.Run()
 	if err != nil {
 		fmt.Printf("Prompt failed %v\n", err)
 		return err
@@ -164,7 +155,7 @@ func initAction(c *cli.Context) error {
 	p.Tickets = tickets
 
 	x, _ := yaml.Marshal(&p)
-	err = ioutil.WriteFile(filepath.Join(config.ProjectRoot(), "comply.yml"), x, os.FileMode(0644))
+	err = os.WriteFile(filepath.Join(config.ProjectRoot(), "comply.yml"), x, os.FileMode(0644))
 	if err != nil {
 		return cli.NewExitError(err, 1)
 	}
@@ -172,14 +163,14 @@ func initAction(c *cli.Context) error {
 	replace := make(map[string]string)
 	replace["Name"] = p.Name
 
-	err = theme.SaveTo(themeName, replace, config.ProjectRoot())
+	err = theme.SaveTo("comply-soc2", replace, config.ProjectRoot())
 	if err != nil {
 		return cli.NewExitError(err, 1)
 	}
 
 	success := fmt.Sprintf("%s Compliance initialized successfully!", name)
 	fmt.Printf("%s %s\n\n", promptui.IconGood, success)
-	fmt.Println(whatNow)
+	fmt.Print(whatNow)
 
 	return nil
 }

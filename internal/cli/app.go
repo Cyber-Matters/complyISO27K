@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -92,7 +91,7 @@ func feedbackError(message string) error {
 }
 
 func projectMustExist(c *cli.Context) error {
-	_, err := ioutil.ReadFile(filepath.Join(config.ProjectRoot(), "comply.yml"))
+	_, err := os.ReadFile(filepath.Join(config.ProjectRoot(), "comply.yml"))
 	if err != nil {
 		return feedbackError("command must be run from the root of a valid comply project (comply.yml must exist; have you run `comply init`?)")
 	}
@@ -115,9 +114,13 @@ func notifyVersion(c *cli.Context) error {
 		}()
 
 		r, err := http.Get("http://comply-releases.s3.amazonaws.com/channel/stable/VERSION")
-		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			return
+		}
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			// fail silently
+			return
 		}
 
 		version := strings.TrimSpace(string(body))
@@ -326,7 +329,7 @@ var dockerPull = func(c *cli.Context) error {
 	defer r.Close()
 
 	// hold function open until all docker IO is complete
-	io.Copy(ioutil.Discard, r)
+	io.Copy(io.Discard, r)
 
 	return nil
 }

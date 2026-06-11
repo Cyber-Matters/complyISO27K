@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,7 +22,8 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true
+		origin := r.Header.Get("Origin")
+		return origin == "" || strings.HasPrefix(origin, "http://localhost") || strings.HasPrefix(origin, "http://127.0.0.1")
 	},
 }
 
@@ -77,18 +79,16 @@ func isNewer(path string, t time.Time) bool {
 
 // Build generates all PDF and HTML output to the target directory with optional live reload.
 func Build(output string, live bool) error {
-	err := os.RemoveAll(output)
-	if err != nil {
-		errors.Wrap(err, "unable to remove files from output directory")
+	if err := os.RemoveAll(output); err != nil {
+		return errors.Wrap(err, "unable to remove files from output directory")
 	}
 
-	err = os.MkdirAll(output, os.FileMode(0755))
-	if err != nil {
-		errors.Wrap(err, "unable to create output directory")
+	if err := os.MkdirAll(output, os.FileMode(0755)); err != nil {
+		return errors.Wrap(err, "unable to create output directory")
 	}
 
 	var wg sync.WaitGroup
-	errCh := make(chan error, 0)
+	errCh := make(chan error, 2)
 	wgCh := make(chan struct{})
 
 	if live {
@@ -96,9 +96,8 @@ func Build(output string, live bool) error {
 
 		go func() {
 			http.Handle("/", http.FileServer(http.Dir(filepath.Join(".", "output"))))
-			err := http.ListenAndServe(fmt.Sprintf("%s:%d", BindAddress, ServePort), nil)
-			if err != nil {
-				panic(err)
+			if err := http.ListenAndServe(fmt.Sprintf("%s:%d", BindAddress, ServePort), nil); err != nil {
+				errCh <- errors.Wrap(err, "unable to start HTTP server")
 			}
 		}()
 

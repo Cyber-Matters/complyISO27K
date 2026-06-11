@@ -1,7 +1,6 @@
 package path
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,19 +36,23 @@ var Procedures = func() ([]File, error) {
 
 func filesFor(name, extension string) ([]File, error) {
 	var filtered []File
-	files, err := ioutil.ReadDir(filepath.Join(".", name))
+	entries, err := os.ReadDir(filepath.Join(".", name))
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to load files for: "+name)
 	}
-	for _, f := range files {
-		if !strings.HasSuffix(f.Name(), "."+extension) || strings.HasPrefix(strings.ToUpper(f.Name()), "README") {
+	for _, entry := range entries {
+		if !strings.HasSuffix(entry.Name(), "."+extension) || strings.HasPrefix(strings.ToUpper(entry.Name()), "README") {
 			continue
 		}
-		abs, err := filepath.Abs(filepath.Join(".", name, f.Name()))
+		abs, err := filepath.Abs(filepath.Join(".", name, entry.Name()))
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to load file: "+f.Name())
+			return nil, errors.Wrap(err, "unable to load file: "+entry.Name())
 		}
-		filtered = append(filtered, File{abs, f})
+		info, err := entry.Info()
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to stat file: "+entry.Name())
+		}
+		filtered = append(filtered, File{abs, info})
 	}
 	return filtered, nil
 }

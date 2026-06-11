@@ -2,7 +2,6 @@ package render
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,7 +35,7 @@ func html(output string, live bool, errCh chan error, wg *sync.WaitGroup) {
 	opened := false
 
 	for {
-		files, err := ioutil.ReadDir(filepath.Join(".", "templates"))
+		files, err := os.ReadDir(filepath.Join(".", "templates"))
 		if err != nil {
 			errCh <- errors.Wrap(err, "unable to open template directory")
 			return
@@ -66,14 +65,15 @@ func html(output string, live bool, errCh chan error, wg *sync.WaitGroup) {
 
 			tpl, err := ace.Load("", filepath.Join("templates", basename), aceOpts)
 			if err != nil {
-				w.Write([]byte("<htmL><body>template error</body></html>"))
-				fmt.Println(err)
+				w.Close()
+				errCh <- errors.Wrap(err, "unable to load template")
+				return
 			}
 
-			err = tpl.Execute(w, data)
-			if err != nil {
-				w.Write([]byte("<htmL><body>template error</body></html>"))
-				fmt.Println(err)
+			if err = tpl.Execute(w, data); err != nil {
+				w.Close()
+				errCh <- errors.Wrap(err, "unable to execute template")
+				return
 			}
 
 			if live {

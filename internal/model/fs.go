@@ -3,7 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -78,7 +78,7 @@ func ReadStandards() ([]*Standard, error) {
 
 	for _, f := range files {
 		s := &Standard{}
-		sBytes, err := ioutil.ReadFile(f.FullPath)
+		sBytes, err := os.ReadFile(f.FullPath)
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to read "+f.FullPath)
 		}
@@ -185,9 +185,9 @@ type metadataMarkdown struct {
 }
 
 func loadMDMD(path string) (*metadataMarkdown, error) {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		return nil, errors.Wrap(err, "unable to read "+path)
 	}
 	content := string(bytes)
 	components := strings.Split(content, "---")

@@ -1,0 +1,20 @@
+UnCONSULT
+Copyright 2026 cybermatters
+
+This product is built on top of Comply, developed by strongDM, Inc.
+(https://github.com/strongdm/comply) and licensed under the Apache
+License, Version 2.0. The original license is retained in LICENSE.txt.
+
+Modifications and additions in this distribution include:
+
+- ISO 27001:2022 Annex A standard definition (93 controls) alongside
+  the original SOC2 Trust Services Criteria
+- Policy, narrative, and Statement of Applicability templates extended
+  to satisfy both ISO 27001:2022 and SOC2
+- Dashboard rendering grouped by control family/clause per standard
+- Bug fixes across the render, config, CLI, and path packages
+  (error handling, goroutine deadlocks, WebSocket origin checking,
+  deprecated io/ioutil usage)
+- Rebranded interactive `init` experience
+
+strongDM, Inc. does not endorse this derivative work.

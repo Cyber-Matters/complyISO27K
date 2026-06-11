@@ -1,0 +1,382 @@
+name: ISO27001
+# ISO 27001:2022 Annex A — 93 controls across four families
+
+# ── Organisational controls (5.x) ────────────────────────────
+A.5.1:
+  family: Organisational
+  name: Policies for information security
+  description: Policies for information security
+A.5.2:
+  family: Organisational
+  name: Information security roles and responsibilities
+  description: Information security roles and responsibilities
+A.5.3:
+  family: Organisational
+  name: Segregation of duties
+  description: Segregation of duties
+A.5.4:
+  family: Organisational
+  name: Management responsibilities
+  description: Management responsibilities
+A.5.5:
+  family: Organisational
+  name: Contact with authorities
+  description: Contact with authorities
+A.5.6:
+  family: Organisational
+  name: Contact with special interest groups
+  description: Contact with special interest groups
+A.5.7:
+  family: Organisational
+  name: Threat intelligence
+  description: Threat intelligence
+A.5.8:
+  family: Organisational
+  name: Information security in project management
+  description: Information security in project management
+A.5.9:
+  family: Organisational
+  name: Inventory of information and other associated assets
+  description: Inventory of information and other associated assets
+A.5.10:
+  family: Organisational
+  name: Acceptable use of information and other associated assets
+  description: Acceptable use of information and other associated assets
+A.5.11:
+  family: Organisational
+  name: Return of assets
+  description: Return of assets
+A.5.12:
+  family: Organisational
+  name: Classification of information
+  description: Classification of information
+A.5.13:
+  family: Organisational
+  name: Labelling of information
+  description: Labelling of information
+A.5.14:
+  family: Organisational
+  name: Information transfer
+  description: Information transfer
+A.5.15:
+  family: Organisational
+  name: Access control
+  description: Access control
+A.5.16:
+  family: Organisational
+  name: Identity management
+  description: Identity management
+A.5.17:
+  family: Organisational
+  name: Authentication information
+  description: Authentication information
+A.5.18:
+  family: Organisational
+  name: Access rights
+  description: Access rights
+A.5.19:
+  family: Organisational
+  name: Information security in supplier relationships
+  description: Information security in supplier relationships
+A.5.20:
+  family: Organisational
+  name: Addressing information security within supplier agreements
+  description: Addressing information security within supplier agreements
+A.5.21:
+  family: Organisational
+  name: Managing information security in the ICT supply chain
+  description: Managing information security in the ICT supply chain
+A.5.22:
+  family: Organisational
+  name: Monitoring, review and change management of supplier services
+  description: Monitoring, review and change management of supplier services
+A.5.23:
+  family: Organisational
+  name: Information security for use of cloud services
+  description: Information security for use of cloud services
+A.5.24:
+  family: Organisational
+  name: Information security incident management planning and preparation
+  description: Information security incident management planning and preparation
+A.5.25:
+  family: Organisational
+  name: Assessment and decision on information security events
+  description: Assessment and decision on information security events
+A.5.26:
+  family: Organisational
+  name: Response to information security incidents
+  description: Response to information security incidents
+A.5.27:
+  family: Organisational
+  name: Learning from information security incidents
+  description: Learning from information security incidents
+A.5.28:
+  family: Organisational
+  name: Collection of evidence
+  description: Collection of evidence
+A.5.29:
+  family: Organisational
+  name: Information security during disruption
+  description: Information security during disruption
+A.5.30:
+  family: Organisational
+  name: ICT readiness for business continuity
+  description: ICT readiness for business continuity
+A.5.31:
+  family: Organisational
+  name: Legal, statutory, regulatory and contractual requirements
+  description: Legal, statutory, regulatory and contractual requirements
+A.5.32:
+  family: Organisational
+  name: Intellectual property rights
+  description: Intellectual property rights
+A.5.33:
+  family: Organisational
+  name: Protection of records
+  description: Protection of records
+A.5.34:
+  family: Organisational
+  name: Privacy and protection of personal identifiable information
+  description: Privacy and protection of personal identifiable information
+A.5.35:
+  family: Organisational
+  name: Independent review of information security
+  description: Independent review of information security
+A.5.36:
+  family: Organisational
+  name: Compliance with policies, rules and standards for information security
+  description: Compliance with policies, rules and standards for information security
+A.5.37:
+  family: Organisational
+  name: Documented operating procedures
+  description: Documented operating procedures
+
+# ── People controls (6.x) ────────────────────────────────────
+A.6.1:
+  family: People
+  name: Screening
+  description: Screening
+A.6.2:
+  family: People
+  name: Terms and conditions of employment
+  description: Terms and conditions of employment
+A.6.3:
+  family: People
+  name: Information security awareness, education and training
+  description: Information security awareness, education and training
+A.6.4:
+  family: People
+  name: Disciplinary process
+  description: Disciplinary process
+A.6.5:
+  family: People
+  name: Responsibilities after termination or change of employment
+  description: Responsibilities after termination or change of employment
+A.6.6:
+  family: People
+  name: Confidentiality or non-disclosure agreements
+  description: Confidentiality or non-disclosure agreements
+A.6.7:
+  family: People
+  name: Remote working
+  description: Remote working
+A.6.8:
+  family: People
+  name: Information security event reporting
+  description: Information security event reporting
+
+# ── Physical controls (7.x) ──────────────────────────────────
+A.7.1:
+  family: Physical
+  name: Physical security perimeters
+  description: Physical security perimeters
+A.7.2:
+  family: Physical
+  name: Physical entry
+  description: Physical entry
+A.7.3:
+  family: Physical
+  name: Securing offices, rooms and facilities
+  description: Securing offices, rooms and facilities
+A.7.4:
+  family: Physical
+  name: Physical security monitoring
+  description: Physical security monitoring
+A.7.5:
+  family: Physical
+  name: Protecting against physical and environmental threats
+  description: Protecting against physical and environmental threats
+A.7.6:
+  family: Physical
+  name: Working in secure areas
+  description: Working in secure areas
+A.7.7:
+  family: Physical
+  name: Clear desk and clear screen
+  description: Clear desk and clear screen
+A.7.8:
+  family: Physical
+  name: Equipment siting and protection
+  description: Equipment siting and protection
+A.7.9:
+  family: Physical
+  name: Security of assets off-premises
+  description: Security of assets off-premises
+A.7.10:
+  family: Physical
+  name: Storage media
+  description: Storage media
+A.7.11:
+  family: Physical
+  name: Supporting utilities
+  description: Supporting utilities
+A.7.12:
+  family: Physical
+  name: Cabling security
+  description: Cabling security
+A.7.13:
+  family: Physical
+  name: Equipment maintenance
+  description: Equipment maintenance
+A.7.14:
+  family: Physical
+  name: Secure disposal or re-use of equipment
+  description: Secure disposal or re-use of equipment
+
+# ── Technological controls (8.x) ─────────────────────────────
+A.8.1:
+  family: Technological
+  name: User end point devices
+  description: User end point devices
+A.8.2:
+  family: Technological
+  name: Privileged access rights
+  description: Privileged access rights
+A.8.3:
+  family: Technological
+  name: Information access restriction
+  description: Information access restriction
+A.8.4:
+  family: Technological
+  name: Access to source code
+  description: Access to source code
+A.8.5:
+  family: Technological
+  name: Secure authentication
+  description: Secure authentication
+A.8.6:
+  family: Technological
+  name: Capacity management
+  description: Capacity management
+A.8.7:
+  family: Technological
+  name: Protection against malware
+  description: Protection against malware
+A.8.8:
+  family: Technological
+  name: Management of technical vulnerabilities
+  description: Management of technical vulnerabilities
+A.8.9:
+  family: Technological
+  name: Configuration management
+  description: Configuration management
+A.8.10:
+  family: Technological
+  name: Information deletion
+  description: Information deletion
+A.8.11:
+  family: Technological
+  name: Data masking
+  description: Data masking
+A.8.12:
+  family: Technological
+  name: Data leakage prevention
+  description: Data leakage prevention
+A.8.13:
+  family: Technological
+  name: Information backup
+  description: Information backup
+A.8.14:
+  family: Technological
+  name: Redundancy of information processing facilities
+  description: Redundancy of information processing facilities
+A.8.15:
+  family: Technological
+  name: Logging
+  description: Logging
+A.8.16:
+  family: Technological
+  name: Monitoring activities
+  description: Monitoring activities
+A.8.17:
+  family: Technological
+  name: Clock synchronisation
+  description: Clock synchronisation
+A.8.18:
+  family: Technological
+  name: Use of privileged utility programs
+  description: Use of privileged utility programs
+A.8.19:
+  family: Technological
+  name: Installation of software on operational systems
+  description: Installation of software on operational systems
+A.8.20:
+  family: Technological
+  name: Networks security
+  description: Networks security
+A.8.21:
+  family: Technological
+  name: Security of network services
+  description: Security of network services
+A.8.22:
+  family: Technological
+  name: Segregation of networks
+  description: Segregation of networks
+A.8.23:
+  family: Technological
+  name: Web filtering
+  description: Web filtering
+A.8.24:
+  family: Technological
+  name: Use of cryptography
+  description: Use of cryptography
+A.8.25:
+  family: Technological
+  name: Secure development life cycle
+  description: Secure development life cycle
+A.8.26:
+  family: Technological
+  name: Application security requirements
+  description: Application security requirements
+A.8.27:
+  family: Technological
+  name: Secure system architecture and engineering principles
+  description: Secure system architecture and engineering principles
+A.8.28:
+  family: Technological
+  name: Secure coding
+  description: Secure coding
+A.8.29:
+  family: Technological
+  name: Security testing in development and acceptance
+  description: Security testing in development and acceptance
+A.8.30:
+  family: Technological
+  name: Outsourced development
+  description: Outsourced development
+A.8.31:
+  family: Technological
+  name: Separation of development, test and production environments
+  description: Separation of development, test and production environments
+A.8.32:
+  family: Technological
+  name: Change management
+  description: Change management
+A.8.33:
+  family: Technological
+  name: Test information
+  description: Test information
+A.8.34:
+  family: Technological
+  name: Protection of information systems during audit testing
+  description: Protection of information systems during audit testing

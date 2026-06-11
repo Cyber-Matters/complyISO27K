@@ -2,7 +2,7 @@ package config
 
 import (
 	"errors"
-	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -64,31 +64,32 @@ func WhichPandoc() string {
 // YAML is the parsed contents of ProjectRoot()/config.yml.
 func YAML() map[interface{}]interface{} {
 	m := make(map[interface{}]interface{})
-	cfgBytes, err := ioutil.ReadFile(filepath.Join(ProjectRoot(), "comply.yml"))
+	cfgBytes, err := os.ReadFile(filepath.Join(ProjectRoot(), "comply.yml"))
 	if err != nil {
-		panic("unable to load config.yml: " + err.Error())
+		log.Fatal("unable to load config.yml: " + err.Error())
 	}
-	yaml.Unmarshal(cfgBytes, &m)
+	if err := yaml.Unmarshal(cfgBytes, &m); err != nil {
+		log.Fatal("unable to parse config.yml: " + err.Error())
+	}
 	return m
 }
 
 // Exists tests for the presence of a comply configuration file.
 func Exists() bool {
-	_, err := ioutil.ReadFile(filepath.Join(ProjectRoot(), "comply.yml"))
-	if err != nil {
-		return false
-	}
-	return true
+	_, err := os.ReadFile(filepath.Join(ProjectRoot(), "comply.yml"))
+	return err == nil
 }
 
 // Config is the parsed contents of ProjectRoot()/config.yml.
 var Config = func() *Project {
 	p := Project{}
-	cfgBytes, err := ioutil.ReadFile(filepath.Join(ProjectRoot(), "comply.yml"))
+	cfgBytes, err := os.ReadFile(filepath.Join(ProjectRoot(), "comply.yml"))
 	if err != nil {
-		panic("unable to load config.yml: " + err.Error())
+		log.Fatal("unable to load config.yml: " + err.Error())
 	}
-	yaml.Unmarshal(cfgBytes, &p)
+	if err := yaml.Unmarshal(cfgBytes, &p); err != nil {
+		log.Fatal("unable to parse config.yml: " + err.Error())
+	}
 	return &p
 }
 
@@ -97,7 +98,7 @@ func ProjectRoot() string {
 	if projectRoot == "" {
 		dir, err := os.Getwd()
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		projectRoot = dir
 	}
@@ -122,7 +123,6 @@ func (p *Project) TicketSystem() (string, error) {
 		case NoTickets:
 			return NoTickets, nil
 		default:
-			// explicit error for this case
 			return "", errors.New("unrecognized ticket system configured")
 		}
 	}
